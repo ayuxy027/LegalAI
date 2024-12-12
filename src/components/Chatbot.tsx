@@ -1,17 +1,119 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
-import { aiPrompt } from '../ai/aiPrompt';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
+import { TypeAnimation } from 'react-type-animation';
 
-const API_KEY = import.meta.env.VITE_API_KEY;
-const API_URL = import.meta.env.VITE_API_URL;
+// Types
+type Sender = 'user' | 'ai';
+
+interface Message {
+  text: string;
+  sender: Sender;
+  isTyping?: boolean;
+}
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'default' | 'ghost';
   size?: 'default' | 'sm' | 'lg';
 }
 
-const Button: React.FC<ButtonProps> = ({ className = '', variant = 'default', size = 'default', children, ...props }) => {
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
+
+interface MessageRendererProps {
+  message: Message;
+  index: number;
+  messages: Message[];
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+}
+
+interface ApiResponse {
+  candidates: Array<{
+    content: {
+      parts: Array<{ text: string }>
+    }
+  }>
+}
+
+// Custom components for markdown rendering
+const MarkdownComponents: React.ComponentProps<typeof ReactMarkdown>['components'] = {
+  h2: ({ children }) => (
+    <h2 className="pb-1 mt-3 mb-2 text-lg font-bold border-b text-primary border-secondary">
+      {children}
+    </h2>
+  ),
+  h3: ({ children }) => (
+    <h3 className="mt-2 mb-1 font-semibold text-md text-primary-dark">
+      {children}
+    </h3>
+  ),
+  ul: ({ children }) => (
+    <ul className="my-2 space-y-1 list-disc list-inside">
+      {children}
+    </ul>
+  ),
+  ol: ({ children }) => (
+    <ol className="my-2 space-y-1 list-decimal list-inside">
+      {children}
+    </ol>
+  ),
+  li: ({ children }) => (
+    <li className="text-gray-700">
+      {children}
+    </li>
+  ),
+  blockquote: ({ children }) => (
+    <blockquote className="py-1 pl-3 my-2 text-sm italic border-l-4 rounded border-primary/30 bg-secondary/20">
+      {children}
+    </blockquote>
+  ),
+  table: ({ children }) => (
+    <div className="my-2 overflow-x-auto border rounded-lg border-secondary">
+      <table className="min-w-full divide-y divide-secondary">
+        {children}
+      </table>
+    </div>
+  ),
+  th: ({ children }) => (
+    <th className="px-3 py-2 text-sm font-semibold bg-secondary/30 text-primary-dark">
+      {children}
+    </th>
+  ),
+  td: ({ children }) => (
+    <td className="px-3 py-2 text-sm border-t border-secondary/30">
+      {children}
+    </td>
+  ),
+  code: ({ children }) => (
+    typeof children === 'string' && children.startsWith('inline') ?
+    <code className="bg-secondary/30 px-1 py-0.5 rounded text-primary-dark text-sm">
+      {children.slice(7)}
+    </code> :
+    <pre className="p-3 my-2 overflow-x-auto text-sm rounded-lg bg-secondary/20">
+      {children}
+    </pre>
+  ),
+  p: ({ children }) => (
+    <p className="text-gray-700 my-1.5 text-sm">
+      {children}
+    </p>
+  ),
+  strong: ({ children }) => (
+    <strong className="font-semibold text-primary-dark">
+      {children}
+    </strong>
+  ),
+};
+
+const Button: React.FC<ButtonProps> = ({ 
+  className = '', 
+  variant = 'default', 
+  size = 'default', 
+  children, 
+  ...props 
+}) => {
   const baseStyle = "inline-flex items-center justify-center text-sm font-medium transition-all focus:outline-none disabled:opacity-50 disabled:pointer-events-none rounded-full";
   const variants = {
     default: "bg-primary text-white hover:bg-primary-dark",
@@ -32,8 +134,6 @@ const Button: React.FC<ButtonProps> = ({ className = '', variant = 'default', si
     </button>
   );
 };
-
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
 
 const Input: React.FC<InputProps> = ({ className = '', ...props }) => {
   return (
@@ -68,10 +168,38 @@ const ThinkingIndicator: React.FC = () => (
   </motion.div>
 );
 
-interface Message {
-  text: string;
-  sender: 'user' | 'ai';
-}
+const MessageRenderer: React.FC<MessageRendererProps> = ({ message }) => {
+  if (message.sender === 'user') {
+    return (
+      <div className="max-w-[80%] p-3 rounded-2xl shadow-md bg-gradient-to-br from-primary to-primary-dark text-white text-sm">
+        {message.text}
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-[80%] p-4 rounded-2xl shadow-md bg-white text-gray-800 border border-secondary/50">
+    {message.isTyping ? (
+      <TypeAnimation
+        sequence={[message.text]}
+        speed={70}
+        cursor={false}
+        wrapper="div"
+        repeat={0}
+      />
+    ) : (
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeRaw]}
+        components={MarkdownComponents}
+        className="prose-sm prose max-w-none"
+      >
+        {message.text}
+      </ReactMarkdown>
+    )}
+  </div>
+  );
+};
 
 const LegalAIChatbot: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -80,6 +208,10 @@ const LegalAIChatbot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const API_KEY = import.meta.env.VITE_API_KEY;
+  const API_URL = import.meta.env.VITE_API_URL;
+  const AI_PROMPT = import.meta.env.VITE_AI_PROMPT;
 
   const predefinedQuestions = [
     "Legal rights",
@@ -90,13 +222,13 @@ const LegalAIChatbot: React.FC = () => {
     "Constitutional law",
   ];
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, scrollToBottom]);
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
@@ -106,12 +238,12 @@ const LegalAIChatbot: React.FC = () => {
     setInput('');
 
     try {
-      const response = await axios.post(
+      const response = await axios.post<ApiResponse>(
         `${API_URL}?key=${API_KEY}`,
         {
           contents: [{
             parts: [{
-              text: `${aiPrompt}\n\nUser query: ${input}`
+              text: `${AI_PROMPT}\n\nUser query: ${input}`
             }]
           }]
         },
@@ -123,10 +255,14 @@ const LegalAIChatbot: React.FC = () => {
       );
 
       const aiResponse = response.data.candidates[0].content.parts[0].text;
-      setMessages(prev => [...prev, { text: aiResponse, sender: 'ai' }]);
+      setMessages(prev => [...prev, { text: aiResponse, sender: 'ai', isTyping: true }]);
     } catch (error) {
       console.error('Error fetching response from API:', error);
-      setMessages(prev => [...prev, { text: "I apologize, there was an error processing your request. Please try again later.", sender: 'ai' }]);
+      setMessages(prev => [...prev, { 
+        text: "I apologize, there was an error processing your request. Please try again later.", 
+        sender: 'ai',
+        isTyping: true 
+      }]);
     }
 
     setIsLoading(false);
@@ -162,7 +298,7 @@ const LegalAIChatbot: React.FC = () => {
               transition={{ duration: 0.3 }}
             >
               <div className="flex items-center space-x-3">
-                <div className="flex items-center justify-center w-12 h-12 text-lg font-bold text-primary bg-white rounded-full shadow-inner">
+                <div className="flex items-center justify-center w-12 h-12 text-lg font-bold bg-white rounded-full shadow-inner text-primary">
                   AI
                 </div>
                 <div>
@@ -205,15 +341,12 @@ const LegalAIChatbot: React.FC = () => {
                     transition={{ duration: 0.3 }}
                     className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
-                    <div
-                      className={`max-w-[80%] p-4 rounded-2xl shadow-md ${
-                        message.sender === 'user'
-                          ? 'bg-gradient-to-br from-primary to-primary-dark text-white'
-                          : 'bg-white text-gray-800 border border-secondary'
-                      }`}
-                    >
-                      {message.text}
-                    </div>
+                    <MessageRenderer
+                      message={message}
+                      index={index}
+                      messages={messages}
+                      setMessages={setMessages}
+                    />
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -247,7 +380,7 @@ const LegalAIChatbot: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => setInput(question)}
-                    className="text-xs transition-colors border border-primary rounded-full hover:bg-secondary"
+                    className="text-xs transition-colors border rounded-full border-primary hover:bg-secondary"
                   >
                     {question}
                   </Button>
