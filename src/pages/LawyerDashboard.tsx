@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { 
-  Clock, 
-  FileText, 
-  BookOpen, 
-  Bell, 
-  CheckCircle, 
-  AlertTriangle, 
+import {
+  Clock,
+  FileText,
+  BookOpen,
+  Bell,
+  CheckCircle,
+  AlertTriangle,
   Briefcase,
-  UserSquare 
+  UserSquare
 } from 'lucide-react';
 import Calendar from '../components/Calender';
 
@@ -30,20 +30,20 @@ const CaseCard: React.FC<CaseCardProps> = ({ title, description, priority, date 
       border rounded-lg p-4 transition-all duration-300 
       hover:shadow-md ${priorityColors[priority]}
     `}>
-      <div className="flex justify-between items-center mb-2">
+      <div className="flex items-center justify-between mb-2">
         <h3 className="text-lg font-semibold text-primary-dark">{title}</h3>
         <span className={`
           px-2 py-1 rounded-full text-xs font-medium
           ${priority === 'High' ? 'bg-red-500 text-white' :
             priority === 'Medium' ? 'bg-yellow-500 text-black' :
-            'bg-green-500 text-white'}
+              'bg-green-500 text-white'}
         `}>
           {priority} Priority
         </span>
       </div>
-      <p className="text-sm text-gray-600 mb-2">{description}</p>
+      <p className="mb-2 text-sm text-gray-600">{description}</p>
       <div className="flex items-center text-sm text-gray-500">
-        <Clock className="mr-2 w-4 h-4" />
+        <Clock className="w-4 h-4 mr-2" />
         <span>{new Date(date).toLocaleDateString()}</span>
       </div>
     </div>
@@ -97,7 +97,7 @@ const LawyerDashboard: React.FC = () => {
       date: '2024-07-10',
     },
   ];
-  
+
   const events = [
     { date: '2024-06-16', title: 'Corporate Merger Meeting', type: 'meeting' },
     { date: '2024-06-19', title: 'IP Dispute Hearing', type: 'hearing' },
@@ -107,99 +107,99 @@ const LawyerDashboard: React.FC = () => {
     { date: '2024-07-02', title: 'Family Law Case Review', type: 'hearing' },
     { date: '2024-07-07', title: 'Bankruptcy Filing Consultation', type: 'deadline' },
   ];
-  
+
   const notifications = [
-    { 
-      icon: <AlertTriangle className="text-yellow-500" />, 
+    {
+      icon: <AlertTriangle className="text-yellow-500" />,
       message: "Client documents pending for Corporate Merger case",
       time: "1 hour ago"
     },
-    { 
-      icon: <CheckCircle className="text-green-500" />, 
+    {
+      icon: <CheckCircle className="text-green-500" />,
       message: "IP Dispute hearing scheduled",
       time: "3 hours ago"
     },
-    { 
-      icon: <Briefcase className="text-blue-500" />, 
+    {
+      icon: <Briefcase className="text-blue-500" />,
       message: "New client consultation request",
       time: "Yesterday"
     },
-    { 
-      icon: <AlertTriangle className="text-yellow-500" />, 
+    {
+      icon: <AlertTriangle className="text-yellow-500" />,
       message: "Real Estate Transaction documents incomplete",
       time: "2 hours ago"
     },
-    { 
-      icon: <CheckCircle className="text-green-500" />, 
+    {
+      icon: <CheckCircle className="text-green-500" />,
       message: "Mergers and Acquisitions strategy approved",
       time: "5 hours ago"
     },
-    { 
-      icon: <Briefcase className="text-blue-500" />, 
+    {
+      icon: <Briefcase className="text-blue-500" />,
       message: "Family Law case scheduled for review",
       time: "Yesterday"
     },
-    { 
-      icon: <CheckCircle className="text-green-500" />, 
+    {
+      icon: <CheckCircle className="text-green-500" />,
       message: "Bankruptcy filing completed",
       time: "6 hours ago"
     },
   ];
-  
+
   const documents = [
-    { 
-      title: "Corporate Merger Agreement", 
-      type: "Legal Document", 
-      date: "2024-06-10" 
+    {
+      title: "Corporate Merger Agreement",
+      type: "Legal Document",
+      date: "2024-06-10"
     },
-    { 
-      title: "Patent Infringement Evidence", 
-      type: "Case Evidence", 
-      date: "2024-06-12" 
+    {
+      title: "Patent Infringement Evidence",
+      type: "Case Evidence",
+      date: "2024-06-12"
     },
-    { 
-      title: "Employment Law Brief", 
-      type: "Legal Brief", 
-      date: "2024-06-14" 
+    {
+      title: "Employment Law Brief",
+      type: "Legal Brief",
+      date: "2024-06-14"
     },
-    { 
-      title: "Real Estate Lease Agreement", 
-      type: "Contract", 
-      date: "2024-06-18" 
+    {
+      title: "Real Estate Lease Agreement",
+      type: "Contract",
+      date: "2024-06-18"
     },
-    { 
-      title: "Mergers and Acquisitions Proposal", 
-      type: "Proposal", 
-      date: "2024-06-20" 
+    {
+      title: "Mergers and Acquisitions Proposal",
+      type: "Proposal",
+      date: "2024-06-20"
     },
-    { 
-      title: "Family Law Case File", 
-      type: "Case File", 
-      date: "2024-06-22" 
+    {
+      title: "Family Law Case File",
+      type: "Case File",
+      date: "2024-06-22"
     },
-    { 
-      title: "Bankruptcy Filing Documents", 
-      type: "Legal Documents", 
-      date: "2024-06-25" 
+    {
+      title: "Bankruptcy Filing Documents",
+      type: "Legal Documents",
+      date: "2024-06-25"
     },
-  ];  
+  ];
 
   return (
-    <div className="bg-background min-h-screen p-6">
+    <div className="min-h-screen p-6 bg-background">
       <div className="container mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex items-center justify-between mb-8">
           <div className="flex items-center">
-            <UserSquare className="mr-4 text-primary w-10 h-10" />
+            <UserSquare className="w-10 h-10 mr-4 text-primary" />
             <h1 className="text-3xl font-bold text-primary-dark">Lawyer Dashboard</h1>
           </div>
-          <div className="bg-secondary rounded-full p-2">
+          <div className="p-2 rounded-full bg-secondary">
             <Bell className="text-primary-dark" />
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex mb-6 bg-secondary/50 rounded-full p-1">
+        <div className="flex p-1 mb-6 rounded-full bg-secondary/50">
           {[
             { id: 'cases', label: 'Cases', icon: <FileText /> },
             { id: 'documents', label: 'Documents', icon: <BookOpen /> },
@@ -210,24 +210,24 @@ const LawyerDashboard: React.FC = () => {
               onClick={() => setActiveTab(tab.id as any)}
               className={`
                 flex-1 flex items-center justify-center p-3 rounded-full transition-all
-                ${activeTab === tab.id 
-                  ? 'bg-primary text-white' 
+                ${activeTab === tab.id
+                  ? 'bg-primary text-white'
                   : 'text-primary-dark hover:bg-secondary'}
               `}
             >
               {tab.icon}
-              <span className="ml-2 hidden md:inline">{tab.label}</span>
+              <span className="hidden ml-2 md:inline">{tab.label}</span>
             </button>
           ))}
         </div>
 
         {/* Main Content Area */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {/* Cases / Documents / Notifications Sections */}
-          <div className="md:col-span-2 space-y-6">
+          <div className="space-y-6 md:col-span-2">
             {activeTab === 'cases' && (
               <>
-                <h2 className="text-xl font-semibold text-primary-dark flex items-center">
+                <h2 className="flex items-center text-xl font-semibold text-primary-dark">
                   <Briefcase className="mr-2 text-primary" /> Active Cases
                 </h2>
                 <div className="space-y-4">
@@ -240,16 +240,16 @@ const LawyerDashboard: React.FC = () => {
 
             {activeTab === 'documents' && (
               <>
-                <h2 className="text-xl font-semibold text-primary-dark flex items-center">
+                <h2 className="flex items-center text-xl font-semibold text-primary-dark">
                   <BookOpen className="mr-2 text-primary" /> Case Documents
                 </h2>
                 <div className="space-y-4">
                   {documents.map((doc, index) => (
-                    <div 
-                      key={index} 
-                      className="bg-secondary/50 p-4 rounded-lg hover:bg-secondary transition-colors"
+                    <div
+                      key={index}
+                      className="p-4 transition-colors rounded-lg bg-secondary/50 hover:bg-secondary"
                     >
-                      <div className="flex justify-between items-center">
+                      <div className="flex items-center justify-between">
                         <div>
                           <h3 className="font-semibold text-primary-dark">{doc.title}</h3>
                           <p className="text-sm text-gray-600">{doc.type}</p>
@@ -264,14 +264,14 @@ const LawyerDashboard: React.FC = () => {
 
             {activeTab === 'notifications' && (
               <>
-                <h2 className="text-xl font-semibold text-primary-dark flex items-center">
+                <h2 className="flex items-center text-xl font-semibold text-primary-dark">
                   <Bell className="mr-2 text-primary" /> Recent Notifications
                 </h2>
                 <div className="space-y-4">
                   {notifications.map((notification, index) => (
-                    <div 
-                      key={index} 
-                      className="bg-secondary/50 p-4 rounded-lg flex items-center hover:bg-secondary transition-colors"
+                    <div
+                      key={index}
+                      className="flex items-center p-4 transition-colors rounded-lg bg-secondary/50 hover:bg-secondary"
                     >
                       <div className="mr-4">{notification.icon}</div>
                       <div className="flex-grow">
@@ -287,25 +287,27 @@ const LawyerDashboard: React.FC = () => {
 
           {/* Sidebar with Calendar */}
           <div>
-            <Calendar events={events} />
-            
+            <Calendar customEvents={events.map(event => ({
+              ...event,
+              type: event.type as 'hearing' | 'meeting' | 'deadline' | 'appointment'
+            }))} />
             {/* Quick Stats */}
-            <div className="mt-6 bg-secondary/50 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-primary-dark mb-4">Case Statistics</h3>
+            <div className="p-4 mt-6 rounded-lg bg-secondary/50">
+              <h3 className="mb-4 text-lg font-semibold text-primary-dark">Case Statistics</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white rounded-lg p-3 text-center">
+                <div className="p-3 text-center bg-white rounded-lg">
                   <h4 className="text-sm text-gray-500">Active Cases</h4>
                   <p className="text-2xl font-bold text-primary-dark">15</p>
                 </div>
-                <div className="bg-white rounded-lg p-3 text-center">
+                <div className="p-3 text-center bg-white rounded-lg">
                   <h4 className="text-sm text-gray-500">Won Cases</h4>
                   <p className="text-2xl font-bold text-primary-dark">8</p>
                 </div>
-                <div className="bg-white rounded-lg p-3 text-center">
+                <div className="p-3 text-center bg-white rounded-lg">
                   <h4 className="text-sm text-gray-500">Pending Appeals</h4>
                   <p className="text-2xl font-bold text-primary-dark">3</p>
                 </div>
-                <div className="bg-white rounded-lg p-3 text-center">
+                <div className="p-3 text-center bg-white rounded-lg">
                   <h4 className="text-sm text-gray-500">Success Rate</h4>
                   <p className="text-2xl font-bold text-primary-dark">85%</p>
                 </div>
