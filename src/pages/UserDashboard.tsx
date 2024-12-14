@@ -30,7 +30,7 @@ const CaseCard: React.FC<CaseCardProps> = ({ title, description, priority, date 
       border rounded-lg p-4 transition-all duration-300 
       hover:shadow-md ${priorityColors[priority]}
     `}>
-      <div className="flex justify-between items-center mb-2">
+      <div className="flex items-center justify-between mb-2">
         <h3 className="text-lg font-semibold text-primary-dark">{title}</h3>
         <span className={`
           px-2 py-1 rounded-full text-xs font-medium
@@ -41,9 +41,9 @@ const CaseCard: React.FC<CaseCardProps> = ({ title, description, priority, date 
           {priority} Priority
         </span>
       </div>
-      <p className="text-sm text-gray-600 mb-2">{description}</p>
+      <p className="mb-2 text-sm text-gray-600">{description}</p>
       <div className="flex items-center text-sm text-gray-500">
-        <Clock className="mr-2 w-4 h-4" />
+        <Clock className="w-4 h-4 mr-2" />
         <span>{new Date(date).toLocaleDateString()}</span>
       </div>
     </div>
@@ -185,21 +185,21 @@ const UserDashboard: React.FC = () => {
   ];  
 
   return (
-    <div className="bg-background min-h-screen p-6">
+    <div className="min-h-screen p-6 bg-background">
       <div className="container mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex items-center justify-between mb-8">
           <div className="flex items-center">
-            <User className="mr-4 text-primary w-10 h-10" />
+            <User className="w-10 h-10 mr-4 text-primary" />
             <h1 className="text-3xl font-bold text-primary-dark">Client Dashboard</h1>
           </div>
-          <div className="bg-secondary rounded-full p-2">
+          <div className="p-2 rounded-full bg-secondary">
             <Bell className="text-primary-dark" />
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex mb-6 bg-secondary/50 rounded-full p-1">
+        <div className="flex p-1 mb-6 rounded-full bg-secondary/50">
           {[
             { id: 'cases', label: 'My Cases', icon: <FileText /> },
             { id: 'resources', label: 'Resources', icon: <HelpCircle /> },
@@ -216,17 +216,17 @@ const UserDashboard: React.FC = () => {
               `}
             >
               {tab.icon}
-              <span className="ml-2 hidden md:inline">{tab.label}</span>
+              <span className="hidden ml-2 md:inline">{tab.label}</span>
             </button>
           ))}
         </div>
 
         {/* Main Content Area */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 space-y-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="space-y-6 md:col-span-2">
             {activeTab === 'cases' && (
               <>
-                <h2 className="text-xl font-semibold text-primary-dark flex items-center">
+                <h2 className="flex items-center text-xl font-semibold text-primary-dark">
                   <FileText className="mr-2 text-primary" /> Active Cases
                 </h2>
                 <div className="space-y-4">
@@ -239,16 +239,16 @@ const UserDashboard: React.FC = () => {
 
             {activeTab === 'resources' && (
               <>
-                <h2 className="text-xl font-semibold text-primary-dark flex items-center">
+                <h2 className="flex items-center text-xl font-semibold text-primary-dark">
                   <HelpCircle className="mr-2 text-primary" /> Legal Resources
                 </h2>
                 <div className="space-y-4">
                   {resources.map((resource, index) => (
                     <div 
                       key={index} 
-                      className="bg-secondary/50 p-4 rounded-lg hover:bg-secondary transition-colors cursor-pointer"
+                      className="p-4 transition-colors rounded-lg cursor-pointer bg-secondary/50 hover:bg-secondary"
                     >
-                      <div className="flex justify-between items-center">
+                      <div className="flex items-center justify-between">
                         <div>
                           <h3 className="font-semibold text-primary-dark">{resource.title}</h3>
                           <p className="text-sm text-gray-600">{resource.type}</p>
@@ -263,14 +263,14 @@ const UserDashboard: React.FC = () => {
 
             {activeTab === 'notifications' && (
               <>
-                <h2 className="text-xl font-semibold text-primary-dark flex items-center">
+                <h2 className="flex items-center text-xl font-semibold text-primary-dark">
                   <Bell className="mr-2 text-primary" /> Recent Updates
                 </h2>
                 <div className="space-y-4">
                   {notifications.map((notification, index) => (
                     <div 
                       key={index} 
-                      className="bg-secondary/50 p-4 rounded-lg flex items-center hover:bg-secondary transition-colors"
+                      className="flex items-center p-4 transition-colors rounded-lg bg-secondary/50 hover:bg-secondary"
                     >
                       <div className="mr-4">{notification.icon}</div>
                       <div className="flex-grow">
@@ -286,21 +286,24 @@ const UserDashboard: React.FC = () => {
 
           {/* Sidebar */}
           <div>
-            <Calendar events={events} />
+          <Calendar customEvents={events.map(event => ({
+              ...event,
+              type: event.type as 'hearing' | 'meeting' | 'deadline' | 'appointment'
+            }))} />
             
             {/* Case Status */}
-            <div className="mt-6 bg-secondary/50 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-primary-dark mb-4">Case Status</h3>
+            <div className="p-4 mt-6 rounded-lg bg-secondary/50">
+              <h3 className="mb-4 text-lg font-semibold text-primary-dark">Case Status</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white rounded-lg p-3 text-center">
+                <div className="p-3 text-center bg-white rounded-lg">
                   <h4 className="text-sm text-gray-500">Active Cases</h4>
                   <p className="text-2xl font-bold text-primary-dark">3</p>
                 </div>
-                <div className="bg-white rounded-lg p-3 text-center">
+                <div className="p-3 text-center bg-white rounded-lg">
                   <h4 className="text-sm text-gray-500">Completed</h4>
                   <p className="text-2xl font-bold text-primary-dark">2</p>
                 </div>
-                <div className="bg-white rounded-lg p-3 text-center col-span-2">
+                <div className="col-span-2 p-3 text-center bg-white rounded-lg">
                   <h4 className="text-sm text-gray-500">Next Hearing</h4>
                   <p className="text-lg font-bold text-primary-dark">June 22, 2024</p>
                 </div>
