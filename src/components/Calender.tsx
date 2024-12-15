@@ -134,7 +134,7 @@ const Calendar: React.FC<CalendarProps> = ({ customEvents }) => {
     // Empty cells for days before the first day of the month
     for (let i = 0; i < firstDayOfMonth; i++) {
       days.push(
-        <div key={`empty-${i}`} className="opacity-20 text-center p-2">
+        <div key={`empty-${i}`} className="p-2 text-center opacity-20">
           {/* Empty cell */}
         </div>
       );
@@ -163,7 +163,7 @@ const Calendar: React.FC<CalendarProps> = ({ customEvents }) => {
             {day}
           </span>
           {dateEvents.length > 0 && (
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-b-lg"></div>
+            <div className="absolute bottom-0 left-0 right-0 h-1 rounded-b-lg bg-primary"></div>
           )}
         </div>
       );
@@ -201,12 +201,12 @@ const Calendar: React.FC<CalendarProps> = ({ customEvents }) => {
   const { icon, title } = getRouteDetails();
 
   return (
-    <div className="bg-background shadow-lg rounded-2xl p-6 max-w-md mx-auto">
+    <div className="max-w-md p-6 mx-auto shadow-lg bg-background rounded-2xl">
       {/* Header with month navigation */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex items-center justify-between mb-6">
         <button 
           onClick={handlePrevMonth} 
-          className="p-2 hover:bg-secondary rounded-full transition-colors"
+          className="p-2 transition-colors rounded-full hover:bg-secondary"
         >
           <ChevronLeft className="text-primary-dark" />
         </button>
@@ -217,7 +217,7 @@ const Calendar: React.FC<CalendarProps> = ({ customEvents }) => {
         
         <button 
           onClick={handleNextMonth} 
-          className="p-2 hover:bg-secondary rounded-full transition-colors"
+          className="p-2 transition-colors rounded-full hover:bg-secondary"
         >
           <ChevronRight className="text-primary-dark" />
         </button>
@@ -226,7 +226,7 @@ const Calendar: React.FC<CalendarProps> = ({ customEvents }) => {
       {/* Weekday headers */}
       <div className="grid grid-cols-7 gap-2 mb-4">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-          <div key={day} className="text-center font-medium text-sm text-primary-dark opacity-70">
+          <div key={day} className="text-sm font-medium text-center text-primary-dark opacity-70">
             {day}
           </div>
         ))}
@@ -239,8 +239,8 @@ const Calendar: React.FC<CalendarProps> = ({ customEvents }) => {
 
       {/* Events Section */}
       {events.length > 0 && (
-        <div className="mt-6 border-t border-secondary pt-4">
-          <h3 className="text-lg font-semibold text-primary-dark mb-3 flex items-center">
+        <div className="pt-4 mt-6 border-t border-secondary">
+          <h3 className="flex items-center mb-3 text-lg font-semibold text-primary-dark">
             {icon}
             {title}
           </h3>
@@ -273,7 +273,7 @@ const Calendar: React.FC<CalendarProps> = ({ customEvents }) => {
                 <div>
                   <p className="font-medium text-primary-dark">{event.title}</p>
                   {event.time && (
-                    <div className="text-sm text-primary-dark/70 flex items-center">
+                    <div className="flex items-center text-sm text-primary-dark/70">
                       <Clock className="w-4 h-4 mr-1" />
                       {event.time}
                     </div>
