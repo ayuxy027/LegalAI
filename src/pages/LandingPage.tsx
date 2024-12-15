@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import homeimg from '../assets/homeimg.png';
 import { 
   Scale, 
   Shield, 
@@ -188,7 +189,7 @@ const LandingPage: React.FC = () => {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
           >
-            <div>
+            <div className="ml-8">
               <h2 className="mb-6 text-4xl font-bold">Why Choose Legal AI?</h2>
               <div className="space-y-4">
                 {[
@@ -219,6 +220,7 @@ const LandingPage: React.FC = () => {
             >
               <div className="absolute inset-0 overflow-hidden bg-gradient-to-r from-primary/20 to-secondary/20 rounded-2xl">
                 {/* Add your image or animation here */}
+                <img src={homeimg} alt="home page image" />
               </div>
             </motion.div>
           </motion.div>
@@ -248,25 +250,56 @@ const LandingPage: React.FC = () => {
       <footer className="py-12 text-white bg-gray-900">
         <div className="container px-4 mx-auto">
           <div className="grid gap-8 md:grid-cols-4">
+            {/* About Section */}
             <div>
               <Scale className="w-10 h-10 mb-4 text-primary" />
-              <p className="text-gray-400">Empowering legal professionals with next-generation AI technology.</p>
+              <p className="text-gray-400">
+                At Legal AI, we empower legal professionals by leveraging AI to streamline research, documentation, and case management within the Indian legal ecosystem.
+              </p>
             </div>
-            {['Product', 'Company', 'Resources', 'Legal'].map((section, index) => (
-              <div key={index}>
-                <h3 className="mb-4 font-semibold">{section}</h3>
-                <ul className="space-y-2 text-gray-400">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <li key={i} className="cursor-pointer hover:text-primary">
-                      {section} Link {i + 1}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+
+            {/* Product Section */}
+            <div>
+              <h3 className="mb-4 font-semibold">Product</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li className="cursor-pointer hover:text-primary">Case Research Tool</li>
+                <li className="cursor-pointer hover:text-primary">Legal Document Drafting</li>
+                <li className="cursor-pointer hover:text-primary">Case Management</li>
+                <li className="cursor-pointer hover:text-primary">Analytics Dashboard</li>
+              </ul>
+            </div>
+
+            {/* Company Section */}
+            <div>
+              <h3 className="mb-4 font-semibold">Company</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li className="cursor-pointer hover:text-primary">About Us</li>
+                <li className="cursor-pointer hover:text-primary">Careers</li>
+                <li className="cursor-pointer hover:text-primary">Press</li>
+                <li className="cursor-pointer hover:text-primary">Contact</li>
+              </ul>
+            </div>
+
+            {/* Resources Section */}
+            <div>
+              <h3 className="mb-4 font-semibold">Resources</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li className="cursor-pointer hover:text-primary">Blog</li>
+                <li className="cursor-pointer hover:text-primary">Legal Insights</li>
+                <li className="cursor-pointer hover:text-primary">Case Studies</li>
+                <li className="cursor-pointer hover:text-primary">Help Center</li>
+              </ul>
+            </div>
           </div>
+
           <div className="pt-8 mt-12 text-center text-gray-400 border-t border-gray-800">
-            © 2024 Legal AI. All rights reserved.
+            <p>© 2024 Legal AI. All rights reserved.</p>
+            <p>Made with ❤️ by Team PartTimeHumans</p>
+            <p>
+              Follow us on 
+              <a href="https://x.com/mai3dalvi" className="mx-1 text-primary hover:underline">X</a>&
+              <a href="https://www.linkedin.com/in/maitridalvi13/" className="mx-1 text-primary hover:underline">LinkedIn</a>
+            </p>
           </div>
         </div>
       </footer>
