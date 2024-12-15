@@ -35,6 +35,7 @@ const LandingPage: React.FC = () => {
 
   useEffect(() => {
     startAnimation();
+    // No need for interval as we're not using state for feature rotation
   }, [startAnimation]);
 
   // Memoize data structures to prevent unnecessary re-renders
@@ -84,7 +85,7 @@ const LandingPage: React.FC = () => {
           initial="hidden"
           animate="visible"
           variants={fadeInUp}
-          className="container px-4 pt-20 pb-32 mx-auto sm:px-6 lg:px-8"
+          className="container px-4 pt-20 pb-32 mx-auto"
         >
           <div className="flex flex-col items-center max-w-4xl mx-auto text-center">
             <motion.div
@@ -93,29 +94,29 @@ const LandingPage: React.FC = () => {
               transition={{ duration: 0.5 }}
               className="p-3 mb-6 rounded-full bg-primary/10"
             >
-              <Scale className="w-8 h-8 text-primary sm:w-10 sm:h-10" />
+              <Scale className="w-10 h-10 text-primary" />
             </motion.div>
             <motion.h1 
-              className="mb-6 text-4xl font-bold text-transparent sm:text-5xl md:text-6xl lg:text-7xl bg-gradient-to-r from-primary to-primary-dark bg-clip-text"
+              className="mb-6 text-5xl font-bold text-transparent md:text-7xl bg-gradient-to-r from-primary to-primary-dark bg-clip-text"
               variants={fadeInUp}
             >
               Legal Innovation Meets Artificial Intelligence
             </motion.h1>
             <motion.p 
-              className="mb-8 text-lg text-gray-600 sm:text-xl lg:text-2xl"
+              className="mb-8 text-xl text-gray-600"
               variants={fadeInUp}
             >
               Transform your legal practice with cutting-edge AI technology. 
               Streamline workflows, enhance decision-making, and deliver superior legal services.
             </motion.p>
             <motion.div 
-              className="flex flex-col gap-4 sm:flex-row"
+              className="flex gap-4"
               variants={fadeInUp}
             >
-              <button className="flex items-center justify-center w-full gap-2 px-6 py-3 text-sm font-medium text-white rounded-full sm:w-auto btn btn-primary md:text-base lg:px-8 lg:py-4">
+              <button className="flex items-center gap-2 px-8 py-3 rounded-full btn btn-primary">
                 Get Started <ArrowRight className="w-4 h-4" />
               </button>
-              <button className="w-full px-6 py-3 text-sm font-medium rounded-full sm:w-auto btn btn-outline md:text-base lg:px-8 lg:py-4">
+              <button className="px-8 py-3 rounded-full btn btn-outline">
                 Watch Demo
               </button>
             </motion.div>
@@ -130,12 +131,12 @@ const LandingPage: React.FC = () => {
               key={i}
               className="absolute w-2 h-2 rounded-full bg-primary/20"
               initial={{ 
-                x: Math.random() * 100 + '%',
-                y: Math.random() * 100 + '%'
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight 
               }}
               animate={{ 
-                x: Math.random() * 100 + '%',
-                y: Math.random() * 100 + '%'
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight 
               }}
               transition={{
                 duration: Math.random() * 10 + 5,
@@ -148,10 +149,10 @@ const LandingPage: React.FC = () => {
       </div>
 
       {/* Features Section */}
-      <section className="py-16 bg-white sm:py-20 lg:py-24">
-        <div className="container px-4 mx-auto sm:px-6 lg:px-8">
+      <section className="py-20 bg-white">
+        <div className="container px-4 mx-auto">
           <motion.div 
-            className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"
+            className="grid gap-8 md:grid-cols-3"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -169,7 +170,7 @@ const LandingPage: React.FC = () => {
                   {feature.icon}
                 </div>
                 <h3 className="mb-2 text-xl font-semibold">{feature.title}</h3>
-                <p className="text-sm text-gray-600 sm:text-base">{feature.description}</p>
+                <p className="text-gray-600">{feature.description}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -177,10 +178,10 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Statistics Section */}
-      <section className="py-16 bg-primary/5 sm:py-20 lg:py-24">
-        <div className="container px-4 mx-auto sm:px-6 lg:px-8">
+      <section className="py-20 bg-primary/5">
+        <div className="container px-4 mx-auto">
           <motion.div 
-            className="grid grid-cols-2 gap-8 sm:grid-cols-4"
+            className="grid grid-cols-2 gap-8 md:grid-cols-4"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -193,8 +194,8 @@ const LandingPage: React.FC = () => {
                 custom={index}
                 animate={controls}
               >
-                <div className="mb-2 text-3xl font-bold text-primary sm:text-4xl lg:text-5xl">{stat.value}</div>
-                <div className="text-sm text-gray-600 sm:text-base">{stat.label}</div>
+                <div className="mb-2 text-4xl font-bold text-primary">{stat.value}</div>
+                <div className="text-gray-600">{stat.label}</div>
               </motion.div>
             ))}
           </motion.div>
@@ -202,17 +203,17 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-16 bg-white sm:py-20 lg:py-24">
-        <div className="container px-4 mx-auto sm:px-6 lg:px-8">
+      <section className="py-20 bg-white">
+        <div className="container px-4 mx-auto">
           <motion.div 
-            className="grid items-center gap-12 lg:grid-cols-2"
+            className="grid items-center gap-12 md:grid-cols-2"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeInUp}
           >
-            <div className="space-y-6 sm:space-y-8">
-              <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">Why Choose Legal AI?</h2>
+            <div className="ml-8">
+              <h2 className="mb-6 text-4xl font-bold">Why Choose Legal AI?</h2>
               <div className="space-y-4">
                 {benefits.map((item, index) => (
                   <motion.div 
@@ -222,19 +223,19 @@ const LandingPage: React.FC = () => {
                     animate={controls}
                   >
                     <div className="text-primary">{item.icon}</div>
-                    <span className="text-sm sm:text-base">{item.text}</span>
+                    <span>{item.text}</span>
                   </motion.div>
                 ))}
               </div>
             </div>
             <motion.div 
-              className="relative h-[300px] sm:h-[400px] lg:h-[500px]"
+              className="relative h-[400px]"
               initial={{ opacity: 0, x: 100 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
               <div className="absolute inset-0 overflow-hidden bg-gradient-to-r from-primary/20 to-secondary/20 rounded-2xl">
-                <img src={homeimg} alt="Legal AI dashboard" className="object-cover w-full h-full" />
+                <img src={homeimg} alt="Legal AI dashboard" className="w-full h-full" />
               </div>
             </motion.div>
           </motion.div>
@@ -242,19 +243,19 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-primary sm:py-20 lg:py-24">
-        <div className="container px-4 mx-auto text-center sm:px-6 lg:px-8">
+      <section className="py-20 bg-primary">
+        <div className="container px-4 mx-auto text-center">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeInUp}
           >
-            <h2 className="mb-6 text-3xl font-bold text-white sm:text-4xl lg:text-5xl">Ready to Transform Your Legal Practice?</h2>
-            <p className="max-w-2xl mx-auto mb-8 text-sm text-white/80 sm:text-base lg:text-lg">
+            <h2 className="mb-6 text-4xl font-bold text-white">Ready to Transform Your Legal Practice?</h2>
+            <p className="max-w-2xl mx-auto mb-8 text-white/80">
               Join thousands of legal professionals who are already using Legal AI to streamline their practice.
             </p>
-            <button className="px-6 py-3 text-sm font-medium bg-white rounded-full btn text-primary hover:bg-gray-100 sm:text-base lg:px-8 lg:py-4">
+            <button className="px-8 py-3 bg-white rounded-full btn text-primary hover:bg-gray-100">
               Start Free Trial
             </button>
           </motion.div>
@@ -262,21 +263,21 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 text-white bg-gray-900 sm:py-16 lg:py-20">
-        <div className="container px-4 mx-auto sm:px-6 lg:px-8">
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      <footer className="py-12 text-white bg-gray-900">
+        <div className="container px-4 mx-auto">
+          <div className="grid gap-8 md:grid-cols-4">
             {/* About Section */}
             <div>
-              <Scale className="w-8 h-8 mb-4 text-primary sm:w-10 sm:h-10" />
-              <p className="text-sm text-gray-400 sm:text-base">
+              <Scale className="w-10 h-10 mb-4 text-primary" />
+              <p className="text-gray-400">
                 At Legal AI, we empower legal professionals by leveraging AI to streamline research, documentation, and case management within the Indian legal ecosystem.
               </p>
             </div>
 
             {/* Product Section */}
             <div>
-              <h3 className="mb-4 text-lg font-semibold sm:text-xl">Product</h3>
-              <ul className="space-y-2 text-sm text-gray-400 sm:text-base">
+              <h3 className="mb-4 font-semibold">Product</h3>
+              <ul className="space-y-2 text-gray-400">
                 <li className="cursor-pointer hover:text-primary">Case Research Tool</li>
                 <li className="cursor-pointer hover:text-primary">Legal Document Drafting</li>
                 <li className="cursor-pointer hover:text-primary">Case Management</li>
@@ -286,8 +287,8 @@ const LandingPage: React.FC = () => {
 
             {/* Company Section */}
             <div>
-              <h3 className="mb-4 text-lg font-semibold sm:text-xl">Company</h3>
-              <ul className="space-y-2 text-sm text-gray-400 sm:text-base">
+              <h3 className="mb-4 font-semibold">Company</h3>
+              <ul className="space-y-2 text-gray-400">
                 <li className="cursor-pointer hover:text-primary">About Us</li>
                 <li className="cursor-pointer hover:text-primary">Careers</li>
                 <li className="cursor-pointer hover:text-primary">Press</li>
@@ -297,8 +298,8 @@ const LandingPage: React.FC = () => {
 
             {/* Resources Section */}
             <div>
-              <h3 className="mb-4 text-lg font-semibold sm:text-xl">Resources</h3>
-              <ul className="space-y-2 text-sm text-gray-400 sm:text-base">
+              <h3 className="mb-4 font-semibold">Resources</h3>
+              <ul className="space-y-2 text-gray-400">
                 <li className="cursor-pointer hover:text-primary">Blog</li>
                 <li className="cursor-pointer hover:text-primary">Legal Insights</li>
                 <li className="cursor-pointer hover:text-primary">Case Studies</li>
@@ -308,9 +309,9 @@ const LandingPage: React.FC = () => {
           </div>
 
           <div className="pt-8 mt-12 text-center text-gray-400 border-t border-gray-800">
-            <p className="text-sm sm:text-base">© {new Date().getFullYear()} Legal AI. All rights reserved.</p>
-            <p className="text-sm sm:text-base">Made with ❤️ by Team PartTimeHumans</p>
-            <p className="text-sm sm:text-base">
+            <p>© {new Date().getFullYear()} Legal AI. All rights reserved.</p>
+            <p>Made with ❤️ by Team PartTimeHumans</p>
+            <p>
               Follow us on 
               <a href="https://x.com/mai3dalvi" className="mx-1 text-primary hover:underline">X</a>&
               <a href="https://www.linkedin.com/in/maitridalvi13/" className="mx-1 text-primary hover:underline">LinkedIn</a>
