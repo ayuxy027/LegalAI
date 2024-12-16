@@ -10,6 +10,9 @@ import AdvocateDiary from './pages/AdvocateDiary';
 import ChatSection from './components/Chatbot';
 import AuthPage from './pages/AuthPage';
 import DocumentSharing from './pages/DocumentSharing';
+import JudgeDashboard from './pages/JudgeDashboard';
+import LawyerDashboard from './pages/LawyerDashboard';
+import UserDashboard from './pages/UserDashboard';
 
 const App: React.FC = () => {
   return (
@@ -19,6 +22,9 @@ const App: React.FC = () => {
         <div className="mt-[55px]">
           <Routes>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/judge" element={<JudgeDashboard />} />
+            <Route path="/lawyer" element={<LawyerDashboard />} />
+            <Route path="/user" element={<UserDashboard />} />
             <Route path="/summarisation" element={<Summarisation />} />
             <Route path="/transcript" element={<Transcript />} />
             <Route path="/query" element={<DocumentQuery />} />
