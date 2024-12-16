@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CalendarIcon, Clock, FileText, Bell, Plus, Search, Maximize2, Minimize2, RotateCcw, Trash2, CheckCircle, Edit } from 'lucide-react';

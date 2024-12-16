@@ -35,7 +35,6 @@ const LandingPage: React.FC = () => {
 
   useEffect(() => {
     startAnimation();
-    // No need for interval as we're not using state for feature rotation
   }, [startAnimation]);
 
   // Memoize data structures to prevent unnecessary re-renders
@@ -235,7 +234,7 @@ const LandingPage: React.FC = () => {
               viewport={{ once: true }}
             >
               <div className="absolute inset-0 overflow-hidden bg-gradient-to-r from-primary/20 to-secondary/20 rounded-2xl">
-                <img src={homeimg} alt="Legal AI dashboard" className="w-full h-full" />
+                <img src={homeimg} alt="Legal AI dashboard" className="object-cover w-full h-full" />
               </div>
             </motion.div>
           </motion.div>
