@@ -1,5 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CalendarIcon, Clock, FileText, Bell, Plus, Search, Maximize2, Minimize2, RotateCcw, Trash2, CheckCircle, Edit } from 'lucide-react';
@@ -41,8 +39,6 @@ const AdvocateDiary: React.FC = () => {
     ]);
   }, []);
 
-  
-
   const updateCase = useCallback((updatedCase: Case) => {
     setCases(prevCases => prevCases.map(case_ => 
       case_.id === updatedCase.id ? updatedCase : case_
@@ -78,8 +74,15 @@ const AdvocateDiary: React.FC = () => {
     setReminders(prevReminders => prevReminders.filter(reminder => reminder.id !== id));
   }, []);
 
+  const adaptCasesForSorting = (cases: Case[]): { id: string; title: string; date: string }[] =>
+    cases.map(case_ => ({
+      id: case_.id,
+      title: case_.title,
+      date: case_.scheduledDate // Assumes 'scheduledDate' contains the 'date' field needed
+    }));
+
   const filteredCases = useMemo(() => 
-    filterItemsBySearch(sortByDate(cases), searchQuery),
+    filterItemsBySearch(sortByDate(adaptCasesForSorting(cases)), searchQuery),
     [cases, searchQuery]
   );
 
@@ -291,11 +294,9 @@ const AdvocateDiary: React.FC = () => {
   );
 };
 
-export default AdvocateDiary;
-
 // CaseForm component
 const CaseForm: React.FC<{
-  initialData?: Omit<Case, 'id'>;
+  initialData?: Case;
   onSubmit: (caseData: Omit<Case, 'id'>) => void;
   onCancel?: () => void;
 }> = ({ initialData, onSubmit, onCancel }) => {
@@ -312,7 +313,8 @@ const CaseForm: React.FC<{
       nextHearing,
       notes,
       status: initialData?.status || 'upcoming',
-      documents: initialData?.documents || []
+      documents: initialData?.documents || [],
+      scheduledDate: undefined
     });
     if (!initialData) {
       setTitle('');
@@ -478,7 +480,7 @@ const CaseItem: React.FC<{
 
 // ReminderForm component
 const ReminderForm: React.FC<{
-  initialData?: Omit<Reminder, 'id'>;
+  initialData?: Reminder;
   onSubmit: (reminderData: Omit<Reminder, 'id'>) => void;
   onCancel?: () => void;
 }> = ({ initialData, onSubmit, onCancel }) => {
@@ -599,3 +601,5 @@ const ReminderItem: React.FC<{
     </div>
   );
 };
+
+export default AdvocateDiary;

@@ -1,3 +1,4 @@
+import { Key } from 'react';
 import { Case, Reminder, Event } from '../types/types';
 
 export const formatDate = (dateString: string): string => {

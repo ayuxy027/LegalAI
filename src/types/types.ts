@@ -1,6 +1,8 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 export interface Case {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  scheduledDate: any;
   id: string;
   title: string;
   court: string;
