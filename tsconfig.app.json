@@ -24,6 +24,6 @@
   },
   "include": ["src"],
   "exclude": [
-    "src/pages/AdvocateDiary.tsx"
+    "./src/pages/AdvocateDiary.tsx"
   ]
 }
