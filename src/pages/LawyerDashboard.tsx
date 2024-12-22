@@ -1,24 +1,17 @@
 import React, { useState } from 'react';
-import { 
-  Clock, 
-  FileText, 
-  BookOpen, 
-  Bell, 
-  CheckCircle, 
-  AlertTriangle, 
-  Briefcase,
-  UserSquare 
-} from 'lucide-react';
+import { Clock, FileText, BookOpen, Bell, CheckCircle, AlertTriangle, Briefcase, UserSquare } from 'lucide-react';
 import Calendar from '../components/Calender';
+import CaseDetailsModal from '../components/CaseDetailsModal';
 
 interface CaseCardProps {
   title: string;
   description: string;
   priority: 'Low' | 'Medium' | 'High';
   date: string;
+  onClick: () => void;
 }
 
-const CaseCard: React.FC<CaseCardProps> = ({ title, description, priority, date }) => {
+const CaseCard: React.FC<CaseCardProps> = ({ title, description, priority, date, onClick }) => {
   const priorityColors = {
     Low: 'bg-green-50 border-green-200',
     Medium: 'bg-yellow-50 border-yellow-200',
@@ -26,10 +19,13 @@ const CaseCard: React.FC<CaseCardProps> = ({ title, description, priority, date 
   };
 
   return (
-    <div className={`
-      border rounded-lg p-4 transition-all duration-300 
-      hover:shadow-md ${priorityColors[priority]}
-    `}>
+    <div 
+      className={`
+        border rounded-lg p-4 transition-all duration-300 
+        hover:shadow-md ${priorityColors[priority]} cursor-pointer
+      `}
+      onClick={onClick}
+    >
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-lg font-semibold text-primary-dark">{title}</h3>
         <span className={`
@@ -52,6 +48,8 @@ const CaseCard: React.FC<CaseCardProps> = ({ title, description, priority, date 
 
 const LawyerDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'cases' | 'documents' | 'notifications'>('cases');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCaseDetails, setSelectedCaseDetails] = useState<{ label: string; value: string; }[]>([]);
 
   const cases = [
     {
@@ -182,7 +180,31 @@ const LawyerDashboard: React.FC = () => {
       type: "Legal Documents", 
       date: "2024-06-25" 
     },
-  ];  
+  ];
+
+  const generateRandomCaseDetails = (caseData: typeof cases[0]): { label: string; value: string; }[] => {
+    const clientNames = ['John Doe', 'Jane Smith', 'Acme Corporation', 'Tech Innovators Inc.', 'Global Enterprises LLC'];
+    const attorneys = ['Alice Johnson', 'Bob Williams', 'Carol Brown', 'David Miller', 'Eva Garcia'];
+    const courts = ['Supreme Court', 'District Court', 'Federal Court', 'State Court', 'Appellate Court'];
+    const statuses = ['Active', 'Pending', 'On Hold', 'Closed', 'Under Review'];
+
+    return [
+      { label: 'Case Number', value: `${Math.floor(1000 + Math.random() * 9000)}-${new Date().getFullYear()}` },
+      { label: 'Client', value: clientNames[Math.floor(Math.random() * clientNames.length)] },
+      { label: 'Lead Attorney', value: attorneys[Math.floor(Math.random() * attorneys.length)] },
+      { label: 'Court', value: courts[Math.floor(Math.random() * courts.length)] },
+      { label: 'Filed Date', value: new Date(caseData.date).toLocaleDateString() },
+      { label: 'Status', value: statuses[Math.floor(Math.random() * statuses.length)] },
+      { label: 'Priority', value: caseData.priority },
+      { label: 'Description', value: caseData.description },
+    ];
+  };
+
+  const handleCaseClick = (caseData: typeof cases[0]) => {
+    const details = generateRandomCaseDetails(caseData);
+    setSelectedCaseDetails(details);
+    setIsModalOpen(true);
+  };
 
   return (
     <div className="min-h-screen p-6 bg-background">
@@ -207,6 +229,7 @@ const LawyerDashboard: React.FC = () => {
           ].map((tab) => (
             <button
               key={tab.id}
+               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               onClick={() => setActiveTab(tab.id as any)}
               className={`
                 flex-1 flex items-center justify-center p-3 rounded-full transition-all
@@ -232,7 +255,7 @@ const LawyerDashboard: React.FC = () => {
                 </h2>
                 <div className="space-y-4">
                   {cases.map((case_, index) => (
-                    <CaseCard key={index} {...case_} />
+                    <CaseCard key={index} {...case_} onClick={() => handleCaseClick(case_)} />
                   ))}
                 </div>
               </>
@@ -287,7 +310,7 @@ const LawyerDashboard: React.FC = () => {
 
           {/* Sidebar with Calendar */}
           <div>
-          <Calendar customEvents={events.map(event => ({
+            <Calendar customEvents={events.map(event => ({
               ...event,
               type: event.type as 'hearing' | 'meeting' | 'deadline' | 'appointment'
             }))} />
@@ -317,6 +340,11 @@ const LawyerDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+      <CaseDetailsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        caseDetails={selectedCaseDetails}
+      />
     </div>
   );
 };

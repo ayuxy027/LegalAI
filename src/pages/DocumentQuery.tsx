@@ -1,4 +1,4 @@
-import { useState, useRef, ChangeEvent, FormEvent, FC} from 'react';
+import { useState, useRef, ChangeEvent, FormEvent, FC } from 'react';
 import { 
   Paperclip, 
   X, 
@@ -46,20 +46,61 @@ const formatFileSize = (bytes: number): string => {
 };
 
 const DocumentQuery: FC = () => {
-  // Strongly typed state management
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState<string>('');
   const [file, setFile] = useState<FileType | null>(null);
   const [fileInfo, setFileInfo] = useState<FileInfo | null>(null);
+  const [fileId, setFileId] = useState<string | null>(null); // Store the file ID
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [isFilePreviewOpen, setIsFilePreviewOpen] = useState<boolean>(false);
 
-  // Refs with explicit typing
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  // Enhanced submit handler with type safety
-  const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
+  // Handle file upload
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>): void => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      const typedFile = selectedFile as FileType;
+      typedFile.preview = URL.createObjectURL(selectedFile);
+
+      setFile(typedFile);
+      setFileInfo({
+        name: selectedFile.name,
+        size: selectedFile.size,
+        type: selectedFile.type
+      });
+      setIsFilePreviewOpen(true);
+
+      // Upload file to API
+      uploadFile(selectedFile);
+    }
+  };
+
+  // Upload file function
+  const uploadFile = async (file: File): Promise<void> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('http://127.0.0.1:5000/api/ml/v1/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+      if (data.file_id) {
+        setFileId(data.file_id); // Store the file ID
+      } else {
+        console.error("File upload failed", data);
+      }
+    } catch (error) {
+      console.error("Error uploading file", error);
+    }
+  };
+
+  // Handle chat message submission
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     
     if (!inputValue.trim() && !file) return;
@@ -74,43 +115,57 @@ const DocumentQuery: FC = () => {
     setMessages(prevMessages => [...prevMessages, newMessage]);
     setInputValue('');
 
-    // Simulated bot response with typed parameters
-    simulateBotResponse();
-  };
-
-  // Typed file change handler
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      const typedFile = selectedFile as FileType;
-      typedFile.preview = URL.createObjectURL(selectedFile);
-
-      setFile(typedFile);
-      setFileInfo({
-        name: selectedFile.name,
-        size: selectedFile.size,
-        type: selectedFile.type
-      });
-      setIsFilePreviewOpen(true);
+    // Send message to chat API if file ID exists
+    if (fileId) {
+      await sendMessageToChatAPI(inputValue);
     }
   };
 
-  // Simulated bot response with typed implementation
-  const simulateBotResponse = (): void => {
-    setTimeout(() => {
-      const botResponse: Message = {
-        id: generateId(),
-        type: 'bot',
-        content: 'Processing your request. How can I help you further?',
-        timestamp: Date.now()
-      };
-      
-      setMessages(prev => [...prev, botResponse]);
-      scrollToBottom();
-    }, 1000);
+  // Send message to chat API
+  const sendMessageToChatAPI = async (message: string): Promise<void> => {
+    const requestBody = {
+      current_message: message,
+      document_id: fileId
+    };
+
+    try {
+      const response = await fetch('http://127.0.0.1:5000/api/ml/v1/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      const data = await response.json();
+      if (data.chat_response) {
+        const botResponse: Message = {
+          id: generateId(),
+          type: 'bot',
+          content: data.chat_response,
+          timestamp: Date.now()
+        };
+        setMessages(prev => [...prev, botResponse]);
+        scrollToBottom();
+      } else {
+        console.error("Failed to get bot response", data);
+      }
+    } catch (error) {
+      console.error("Error sending message", error);
+    }
   };
 
-  // Remove file method with comprehensive cleanup
+  // Scroll to the bottom of the chat
+  const scrollToBottom = (): void => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  // Remove file and reset state
   const removeFile = (): void => {
     if (file?.preview) {
       URL.revokeObjectURL(file.preview);
@@ -122,16 +177,6 @@ const DocumentQuery: FC = () => {
     
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
-    }
-  };
-
-  // Scroll to bottom utility
-  const scrollToBottom = (): void => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTo({
-        top: chatContainerRef.current.scrollHeight,
-        behavior: 'smooth'
-      });
     }
   };
 
@@ -148,7 +193,6 @@ const DocumentQuery: FC = () => {
           ${isExpanded ? 'w-full h-full' : 'w-[80%] h-[75vh]'}`}
       >
         <div className="flex flex-col h-full">
-          {/* Header with Animated Interactions */}
           <motion.div 
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -177,7 +221,6 @@ const DocumentQuery: FC = () => {
             </div>
           </motion.div>
 
-          {/* Chat Messages with Animated Entries */}
           <div 
             ref={chatContainerRef} 
             className="flex-1 p-4 space-y-4 overflow-y-auto"
@@ -206,7 +249,6 @@ const DocumentQuery: FC = () => {
             </AnimatePresence>
           </div>
 
-          {/* File Preview with Animations */}
           <AnimatePresence>
             {isFilePreviewOpen && fileInfo && (
               <motion.div 
@@ -237,7 +279,6 @@ const DocumentQuery: FC = () => {
             )}
           </AnimatePresence>
 
-          {/* Input Area with Smooth Interactions */}
           <div className="p-4 bg-white border-t border-gray-200">
             <form onSubmit={handleSubmit} className="flex flex-col space-y-2">
               <motion.div 
@@ -250,32 +291,36 @@ const DocumentQuery: FC = () => {
                   type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Upload your document for summarization, analysis or translation..."
-                  className="flex-1 p-2 transition-all duration-200 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Type your message here"
+                  className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 />
-                <motion.label 
+                <label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="application/pdf"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="p-2 text-gray-500 rounded-full transition-colors duration-200 hover:bg-gray-100"
+                  >
+                    <Paperclip className="w-5 h-5" />
+                  </motion.button>
+                </label>
+                <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  htmlFor="file-upload"
-                  className="p-2 transition-colors duration-200 bg-gray-200 rounded-md cursor-pointer hover:bg-gray-300"
-                >
-                  <Paperclip className="w-6 h-6 text-gray-600" />
-                </motion.label>
-                <input
-                  id="file-upload"
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
                   type="submit"
                   disabled={!inputValue.trim() && !file}
-                  className="p-2 text-white transition-colors duration-200 rounded-md bg-primary hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`p-2 rounded-full ${!inputValue.trim() && !file ? 'bg-gray-300' : 'bg-primary'} 
+                    text-white`}
                 >
-                  <Send className="w-6 h-6" />
+                  <Send className="w-5 h-5" />
                 </motion.button>
               </motion.div>
             </form>

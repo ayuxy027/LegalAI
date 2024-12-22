@@ -16,6 +16,7 @@ import {
 interface Step {
   title: string;
   description: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon: React.ComponentType<any>;
 }
 
@@ -44,45 +45,50 @@ const DocumentSummarizer: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
       setActiveStep(1);
-      processDocument(selectedFile);
+      await processDocument(selectedFile);
     }
   };
 
   const processDocument = async (selectedFile: File) => {
     setIsProcessing(true);
-    // Simulating API call
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    setSummary(`CASE SUMMARY - ${selectedFile.name}
 
-KEY POINTS:
-1. Contract dispute between Tech Corp and Innovation Ltd
-2. Breach of service agreement dated June 1, 2023
-3. Damages claimed: $500,000
+    const formData = new FormData();
+    formData.append('file', selectedFile);
 
-COURT'S DECISION:
-- Partial summary judgment granted
-- Tech Corp liable for breach of contract
-- Damages reduced to $350,000
+    try {
+      const uploadResponse = await fetch('http://127.0.0.1:5000/api/ml/v1/upload', {
+        method: 'POST',
+        body: formData,
+      });
 
-REASONING:
-The court found substantial evidence of contract breach but determined that some claimed damages were speculative.
+      const uploadData = await uploadResponse.json();
+      const { file_id } = uploadData;
 
-IMPLICATIONS:
-1. Sets precedent for similar tech service agreements
-2. Emphasizes importance of clear deliverable timelines
-3. Highlights damage calculation methodology
+      // const summaryResponse = await fetch(`http://127.0.0.1:5000/api/ml/v1/summary?document_id=${file_id}`);
+      const summaryResponse = await fetch("http://127.0.0.1:5000/api/ml/v1/summary", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+              document_id: file_id,
+          }),
+      });
+      const summaryData = await summaryResponse.json();
+      console.log(summaryData);
 
-NEXT STEPS:
-- Appeal period: 30 days from judgment
-- Payment schedule to be determined
-- Parties to meet for settlement conference`);
-    setIsProcessing(false);
-    setActiveStep(2);
+      setSummary(summaryData.chat_response);
+      setIsProcessing(false);
+      setActiveStep(2);
+    } catch (error) {
+      console.error('Error processing document:', error);
+      setIsProcessing(false);
+    }
   };
 
   const resetForm = () => {
@@ -260,41 +266,30 @@ NEXT STEPS:
                     >
                       <motion.div 
                         className="p-4 overflow-y-auto font-mono text-sm rounded-lg bg-gray-50 max-h-64"
-                        initial={{ y: 20 }}
+                        initial={{ y: 10 }}
                         animate={{ y: 0 }}
                       >
-                        <pre className="whitespace-pre-wrap">{summary}</pre>
+                        {summary}
                       </motion.div>
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => {
-                          const blob = new Blob([summary], { type: 'text/plain' });
-                          const url = URL.createObjectURL(blob);
-                          const a = document.createElement('a');
-                          a.href = url;
-                          a.download = 'summary.txt';
-                          document.body.appendChild(a);
-                          a.click();
-                          document.body.removeChild(a);
-                          URL.revokeObjectURL(url);
-                        }}
-                        className="flex items-center justify-center w-full gap-2 px-4 py-2 text-white transition-colors rounded-lg bg-primary hover:bg-primary/90"
+                      <a
+                        href={`data:text/plain;charset=utf-8,${encodeURIComponent(summary)}`}
+                        download="summary.txt"
+                        className="flex items-center space-x-2 text-primary hover:text-primary/90"
                       >
                         <Download className="w-5 h-5" />
-                        Download Summary
-                      </motion.button>
+                        <span>Download Summary</span>
+                      </a>
                     </motion.div>
                   ) : (
-                    <motion.div
-                      key="empty"
+                    <motion.div 
+                      key="no-summary"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="flex flex-col items-center justify-center h-64 text-gray-400"
+                      className="text-center text-gray-600"
                     >
-                      <AlertCircle className="w-12 h-12 mb-2" />
-                      <p>Upload a document to see the summary</p>
+                      <AlertCircle className="w-12 h-12 mx-auto text-gray-500" />
+                      <p className="mt-4">No summary yet. Upload a document to get started.</p>
                     </motion.div>
                   )}
                 </AnimatePresence>

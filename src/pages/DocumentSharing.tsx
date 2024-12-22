@@ -1,8 +1,8 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { motion, AnimatePresence, Variants } from 'framer-motion';
+import React, { useState, useRef, useCallback, DragEvent, ChangeEvent } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, FileText, X, Download } from 'lucide-react';
+import axios from 'axios';
 
-// Enhanced type definitions
 type FileType = File & { preview?: string };
 
 interface FileInfo {
@@ -16,10 +16,9 @@ enum ProcessingStatus {
     Idle = 'idle',
     Uploading = 'uploading',
     Completed = 'completed',
-    Error = 'error'
+    Error = 'error',
 }
 
-// Utility functions
 const formatFileSize = (bytes: number): string => {
     const units = ['B', 'KB', 'MB', 'GB'];
     let size = bytes;
@@ -33,62 +32,50 @@ const formatFileSize = (bytes: number): string => {
     return `${size.toFixed(1)} ${units[unitIndex]}`;
 };
 
-// Animation variants
-const fadeInUp: Variants = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -20 }
-};
-
 const DocumentSharing: React.FC = () => {
     const [file, setFile] = useState<FileType | null>(null);
-    const [fileInfo, setFileInfo] = useState<FileInfo | null>(null);
+    const [uploadedFiles, setUploadedFiles] = useState<FileInfo[]>([]);
     const [status, setStatus] = useState<ProcessingStatus>(ProcessingStatus.Idle);
-    const [senderEmail, setSenderEmail] = useState<string>('');
     const [errorMessage, setErrorMessage] = useState<string>('');
-
-    const [receivedDocuments] = useState<FileInfo[]>([
-        { name: 'CaseDetails.pdf', size: 102400, type: 'application/pdf', downloadUrl: '#' },
-        { name: 'HearingNotes.docx', size: 204800, type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', downloadUrl: '#' }
-    ]);
+    const [successMessage, setSuccessMessage] = useState<string>('');
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileSelection = useCallback((selectedFile: File) => {
-        const typedFile: FileType = selectedFile;
+        const typedFile = selectedFile as FileType;
         typedFile.preview = URL.createObjectURL(selectedFile);
 
         setFile(typedFile);
-        setFileInfo({
-            name: selectedFile.name,
-            size: selectedFile.size,
-            type: selectedFile.type,
-            downloadUrl: ''
-        });
         setStatus(ProcessingStatus.Idle);
         setErrorMessage('');
     }, []);
 
-    const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedFile = e.target.files?.[0];
-        if (selectedFile) {
-            handleFileSelection(selectedFile);
-        }
-    }, [handleFileSelection]);
+    const handleFileChange = useCallback(
+        (e: ChangeEvent<HTMLInputElement>) => {
+            const selectedFile = e.target.files?.[0];
+            if (selectedFile) {
+                handleFileSelection(selectedFile);
+            }
+        },
+        [handleFileSelection]
+    );
 
-    const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.stopPropagation();
     }, []);
 
-    const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const droppedFile = e.dataTransfer.files[0];
-        if (droppedFile) {
-            handleFileSelection(droppedFile);
-        }
-    }, [handleFileSelection]);
+    const handleDrop = useCallback(
+        (e: DragEvent<HTMLDivElement>) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const droppedFile = e.dataTransfer.files[0];
+            if (droppedFile) {
+                handleFileSelection(droppedFile);
+            }
+        },
+        [handleFileSelection]
+    );
 
     const removeFile = useCallback(() => {
         if (file?.preview) {
@@ -96,7 +83,6 @@ const DocumentSharing: React.FC = () => {
         }
 
         setFile(null);
-        setFileInfo(null);
         setStatus(ProcessingStatus.Idle);
         setErrorMessage('');
 
@@ -105,77 +91,92 @@ const DocumentSharing: React.FC = () => {
         }
     }, [file]);
 
-    const sendFile = async () => {
-        if (!file || !senderEmail) {
-            setErrorMessage('Please select a file and enter a recipient email address.');
+    const handleSubmit = async () => {
+        if (!file) {
+            setErrorMessage('Please select a file to upload.');
             return;
         }
 
         try {
             setStatus(ProcessingStatus.Uploading);
 
-            // Simulate file sending
-            await new Promise((resolve) => setTimeout(resolve, 2000));
+            const fileData = new FormData();
+            fileData.append('file', file);
 
+            const response = await axios.post('https://api.pinata.cloud/pinning/pinFileToIPFS', fileData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    pinata_api_key: import.meta.env.VITE_PINATA_API_KEY,
+                    pinata_secret_api_key: import.meta.env.VITE_PINATA_SECRET_KEY,
+                },
+            });
+
+            const fileUrl = 'https://gateway.pinata.cloud/ipfs/' + response.data.IpfsHash;
+            console.log(fileUrl);
+
+            // Add uploaded file details to the list
+            setUploadedFiles((prevFiles) => [
+                ...prevFiles,
+                { name: file.name, size: file.size, type: file.type, downloadUrl: fileUrl },
+            ]);
+
+            // Show success message temporarily
+            setSuccessMessage('File uploaded successfully!');
+            setTimeout(() => setSuccessMessage(''), 2000);
+
+            // Clear the current file
+            setFile(null);
             setStatus(ProcessingStatus.Completed);
-            alert(`File sent to ${senderEmail} successfully.`);
         } catch (error) {
+            console.error(error);
             setStatus(ProcessingStatus.Error);
             setErrorMessage('Failed to send the file. Please try again.');
-            console.log(error)
         }
     };
 
     return (
-        <motion.div 
+        <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
             className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-b from-background to-secondary/10"
         >
-            <motion.div 
+            <motion.div
                 layout
-                className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[90vh] md:h-[75vh] flex flex-col overflow-hidden"
+                className="bg-white rounded-xl shadow-2xl w-[80%] h-[75vh] flex flex-col overflow-hidden"
             >
-                {/* Header */}
-                <motion.div 
+                <motion.div
                     initial={{ y: -50, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    className="flex flex-col items-center justify-between p-4 border-b border-gray-200 md:flex-row md:p-6 bg-gray-50"
+                    className="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50"
                 >
-                    <div className="mb-4 text-center md:text-left md:mb-0">
-                        <h1 className="flex items-center justify-center space-x-2 text-2xl font-bold md:justify-start md:text-3xl text-primary">
-                            <FileText className="w-6 h-6 md:w-8 md:h-8 text-primary" />
-                            <span>Document Sharing</span>
+                    <div>
+                        <h1 className="flex items-center space-x-2 text-3xl font-bold text-primary">
+                            <FileText className="w-8 h-8 text-primary" />
+                            <span>Confi Doc</span>
                         </h1>
-                        <p className="mt-2 text-sm text-gray-600 md:text-base">Securely share files between judges and lawyers using blockchain functionalities.</p>
+                        <p className="mt-2 text-gray-600">Securely store confidential files of any type & size using a decentralized network.</p>
                     </div>
                 </motion.div>
 
-                {/* Content Area */}
                 <div className="flex flex-col flex-1 overflow-y-auto">
-                    <div className="flex flex-col items-center justify-center p-4 md:p-6">
-                        <AnimatePresence mode="wait">
+                    <div className="flex flex-col items-center justify-center p-6">
+                        <AnimatePresence>
                             {!file && (
                                 <motion.div
                                     key="file-upload"
-                                    variants={fadeInUp}
-                                    initial="initial"
-                                    animate="animate"
-                                    exit="exit"
-                                    className="flex flex-col items-center justify-center w-full h-48 transition-colors duration-200 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer md:h-64 hover:border-primary"
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.9 }}
+                                    className="flex flex-col items-center justify-center w-full h-64 transition-colors duration-200 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-primary"
                                     onDragOver={handleDragOver}
                                     onDrop={handleDrop}
                                     onClick={() => fileInputRef.current?.click()}
                                 >
-                                    <Upload className="w-10 h-10 mb-4 text-gray-400 md:w-12 md:h-12" />
-                                    <p className="mb-2 text-sm text-gray-600 md:text-base">Drag and drop your file here</p>
-                                    <p className="text-xs text-gray-400 md:text-sm">or</p>
-                                    <motion.button 
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        className="px-3 py-1 mt-2 text-sm text-white transition-colors duration-200 rounded-md md:px-4 md:py-2 md:text-base bg-primary hover:bg-primary-dark"
-                                    >
+                                    <Upload className="w-12 h-12 mb-4 text-gray-400" />
+                                    <p className="mb-2 text-gray-600">Drag and drop your file here</p>
+                                    <p className="text-sm text-gray-400">or</p>
+                                    <motion.button className="px-4 py-2 mt-2 text-white bg-primary rounded-md">
                                         Select File
                                     </motion.button>
                                     <input
@@ -183,86 +184,69 @@ const DocumentSharing: React.FC = () => {
                                         ref={fileInputRef}
                                         onChange={handleFileChange}
                                         className="hidden"
-                                        accept=".txt,.pdf,.doc,.docx"
                                     />
                                 </motion.div>
                             )}
 
-                            {file && fileInfo && (
-                                <motion.div 
-                                    variants={fadeInUp}
-                                    initial="initial"
-                                    animate="animate"
-                                    exit="exit"
+                            {file && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 50 }}
+                                    animate={{ opacity: 1, y: 0 }}
                                     className="w-full"
                                 >
-                                    {/* File Details */}
-                                    <div className="flex items-center justify-between p-3 mb-4 bg-gray-100 rounded-lg md:p-4">
-                                        <div className="flex items-center space-x-2 md:space-x-4">
-                                            <FileText className="w-6 h-6 md:w-8 md:h-8 text-primary" />
+                                    <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg">
+                                        <div className="flex items-center space-x-4">
+                                            <FileText className="w-8 h-8 text-primary" />
                                             <div>
-                                                <p className="text-sm font-medium md:text-base">{fileInfo.name}</p>
-                                                <p className="text-xs text-gray-500 md:text-sm">{formatFileSize(fileInfo.size)}</p>
+                                                <p className="font-medium">{file.name}</p>
+                                                <p className="text-sm text-gray-500">{formatFileSize(file.size)}</p>
                                             </div>
                                         </div>
-                                        <motion.button 
-                                            whileHover={{ rotate: 90 }}
-                                            onClick={removeFile} 
-                                            className="text-gray-500 hover:text-gray-700"
-                                        >
-                                            <X className="w-5 h-5 md:w-6 md:h-6" />
+                                        <motion.button onClick={removeFile} className="text-gray-500 hover:text-gray-700">
+                                            <X className="w-6 h-6" />
                                         </motion.button>
                                     </div>
-                                    {/* Sender Email Input */}
-                                    <div className="mb-4">
-                                        <label htmlFor="senderEmail" className="block mb-2 text-sm font-medium text-gray-700 md:text-base">Enter Your Email Id</label>
-                                        <input
-                                            id="senderEmail"
-                                            type="email"
-                                            value={senderEmail}
-                                            onChange={(e) => setSenderEmail(e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg md:px-4 md:py-2 md:text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                            placeholder="example@example.com"
-                                        />
-                                    </div>
-
-                                    {/* Send Button */}
                                     <motion.button
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={sendFile}
-                                        className="w-full py-2 text-sm text-white transition-colors duration-200 rounded-md md:py-3 md:text-base bg-primary hover:bg-primary-dark"
+                                        onClick={handleSubmit}
+                                        className="w-full py-3 mt-4 text-white bg-primary rounded-md"
                                     >
-                                        Send File
+                                        Upload File
                                     </motion.button>
 
                                     {status === ProcessingStatus.Error && (
-                                        <div className="mt-4 text-sm text-red-500 md:text-base">{errorMessage}</div>
+                                        <div className="mt-4 text-red-500">{errorMessage}</div>
                                     )}
                                 </motion.div>
                             )}
                         </AnimatePresence>
                     </div>
 
-                    {/* Received Documents */}
-                    <div className="p-4 md:p-6">
-                        <h2 className="mb-4 text-xl font-bold md:text-2xl text-primary">Received Documents Till Now</h2>
+                    {successMessage && (
+                        <motion.div className="p-4 mt-4 text-center text-green-500">{successMessage}</motion.div>
+                    )}
+
+                    <div className="p-6">
+                        <h2 className="mb-4 text-2xl font-bold text-primary">Uploaded Files</h2>
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                            {receivedDocuments.map((doc, index) => (
-                                <motion.div 
+                            {uploadedFiles.map((doc, index) => (
+                                <motion.div
                                     key={index}
-                                    variants={fadeInUp}
-                                    initial="initial"
-                                    animate="animate"
-                                    className="p-3 bg-gray-100 rounded-lg shadow md:p-4 hover:shadow-lg"
+                                    initial={{ opacity: 0, y: 50 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="p-4 bg-gray-100 rounded-lg shadow"
                                 >
-                                    <div className="flex items-center justify-between mb-2 md:mb-4">
+                                    <div className="flex items-center justify-between mb-4">
                                         <div>
-                                            <p className="text-sm font-medium text-gray-700 md:text-base">{doc.name}</p>
-                                            <p className="text-xs text-gray-500 md:text-sm">{formatFileSize(doc.size)}</p>
+                                            <p className="font-medium text-gray-700">{doc.name}</p>
+                                            <p className="text-sm text-gray-500">{formatFileSize(doc.size)}</p>
                                         </div>
-                                        <a href={doc.downloadUrl} download className="text-primary hover:text-primary-dark">
-                                            <Download className="w-5 h-5 md:w-6 md:h-6" />
+                                        <a
+                                            href={doc.downloadUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-primary hover:text-primary-dark"
+                                        >
+                                            <Download className="w-6 h-6" />
                                         </a>
                                     </div>
                                 </motion.div>
@@ -276,4 +260,5 @@ const DocumentSharing: React.FC = () => {
 };
 
 export default DocumentSharing;
+
 

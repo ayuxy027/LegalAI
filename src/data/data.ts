@@ -6,7 +6,6 @@ export const dummyCases: Case[] = [
     title: 'Sharma vs. Verma',
     court: 'Supreme Court of India',
     nextHearing: '2024-07-15',
-    scheduledDate: '2024-07-15',  // Same as nextHearing
     status: 'upcoming',
     documents: ['Complaint.pdf', 'Evidence_A.jpg'],
     notes: 'Key witness testimony scheduled for next hearing.'
@@ -16,7 +15,6 @@ export const dummyCases: Case[] = [
     title: 'Green Industries Insolvency Case',
     court: 'National Company Law Tribunal (NCLT)',
     nextHearing: '2024-06-30',
-    scheduledDate: '2024-06-30',  // Same as nextHearing
     status: 'pending',
     documents: ['Insolvency Petition.pdf', 'Financial_Statements.xlsx'],
     notes: 'Review latest financial statements before next hearing.'
@@ -26,7 +24,6 @@ export const dummyCases: Case[] = [
     title: 'Rajput Family Trust Dispute',
     court: 'Family Court, Delhi',
     nextHearing: '2024-08-05',
-    scheduledDate: '2024-08-05',  // Same as nextHearing
     status: 'upcoming',
     documents: ['Trust Deed.pdf', 'Asset_List.docx'],
     notes: 'Mediation scheduled for next week.'
@@ -36,7 +33,6 @@ export const dummyCases: Case[] = [
     title: 'Municipal Corporation of Mumbai vs. XYZ Builders',
     court: 'Bombay High Court',
     nextHearing: '2024-07-22',
-    scheduledDate: '2024-07-22',  // Same as nextHearing
     status: 'completed',
     documents: ['Environmental Impact Assessment.pdf', 'Settlement_Agreement.docx'],
     notes: 'Case closed. Monitoring compliance with settlement terms.'

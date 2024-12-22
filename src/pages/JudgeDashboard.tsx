@@ -208,6 +208,7 @@ const JudgeDashboard: React.FC = () => {
           ].map((tab) => (
             <button
               key={tab.id}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               onClick={() => setActiveTab(tab.id as any)}
               className={`
                 flex-1 flex items-center justify-center p-3 rounded-full transition-all
@@ -292,6 +293,7 @@ const JudgeDashboard: React.FC = () => {
               ...event,
               type: event.type as 'hearing' | 'meeting' | 'deadline' | 'appointment'
             }))} />
+            
             {/* Quick Stats */}
             <div className="p-4 mt-6 rounded-lg bg-secondary/50">
               <h3 className="mb-4 text-lg font-semibold text-primary-dark">Quick Stats</h3>

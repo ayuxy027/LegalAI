@@ -1,4 +1,3 @@
-import { Key } from 'react';
 import { Case, Reminder, Event } from '../types/types';
 
 export const formatDate = (dateString: string): string => {
@@ -13,9 +12,7 @@ export const sortByDate = <T extends { date: string }>(items: T[]): T[] => {
   return [...items].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 };
 
-export const filterItemsBySearch = <T extends {
-  id: Key | null | undefined; title: string 
-}>(items: T[], searchQuery: string): T[] => {
+export const filterItemsBySearch = <T extends { id: string; title: string }>(items: T[], searchQuery: string): T[] => {
   const lowercaseQuery = searchQuery.toLowerCase();
   return items.filter(item => item.title.toLowerCase().includes(lowercaseQuery));
 };
