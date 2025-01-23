@@ -12,7 +12,6 @@ import AuthPage from "./pages/AuthPage";
 import DocumentSharing from "./pages/DocumentSharing";
 import LawyerDashboard from "./pages/LawyerDashboard";
 import JudgeDashboard from "./pages/JudgeDashboard";
-import PrivateRoute from "./routes/PrivateRoute";
 import ForbiddenPage from "./pages/ForbiddenPage";
 import UserDashboard from "./pages/UserDashboard";
 
@@ -26,7 +25,7 @@ const App: React.FC = () => {
       {!noNavbarRoutes.includes(location.pathname) && <Navbar />}
 
       <div className="flex-1">
-        <div className="mt-[55px]">
+        <div className="mt-[20px]">
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/lawyer" element={<LawyerDashboard />} />
@@ -41,35 +40,6 @@ const App: React.FC = () => {
             <Route path="/forbidden" element={<ForbiddenPage />} />
             <Route path="/judge" element={<JudgeDashboard />} />
             <Route path="/user" element={<UserDashboard />} />
-
-            {/* <Route
-              path="/UserDashboard"
-              element={
-                <PrivateRoute
-                  element={<UserDashboard />}
-                  requiredRole="user"
-                />
-              }
-            /> */}
-            {/* <Route
-              path="/JudgeDashboard"
-              element={
-                <PrivateRoute
-                  element={<JudgeDashboard />}
-                  requiredRole="judge"
-                />
-              }
-            /> */}
-
-            <Route
-              path="/LawyerDashboard"
-              element={
-                <PrivateRoute
-                  element={<LawyerDashboard />}
-                  requiredRole="lawyer"
-                />
-              }
-            />
           </Routes>
         </div>
       </div>
